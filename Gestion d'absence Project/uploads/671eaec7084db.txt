@@ -1,0 +1,211 @@
+create database centreformation;
+use centreformation;
+create table formation (
+codeForm int primary key  ,
+titreForm varchar(30) ,
+duréeForm int ,
+prixForm decimal(6,2) check (prixForm >= 0)
+);
+insert into formation (codeForm,titreForm,duréeForm,prixForm)
+values(11,'programming Java',12,3600),
+(12,'web devellopment',14,4200),
+(13,'Anglais tachnique',15,3750),
+(14,'Communication',10,2500),
+(15,'Base de données Oracle',20,6000),
+(16,'Soft skills',12,3000);
+update formation 
+set prixForm=prixForm-prixForm*0.1;
+update formation 
+set prixForm=300*duréeForm;
+select * from formation;
+drop table etudiant;
+create table etudiant (
+CINEtu varchar(30) primary key ,
+nomEtu varchar(30),
+prenomEtu varchar(30),
+dateNaissEtu date,
+niveauEtu varchar(45),
+nomVilleEtu varchar(30),
+AdresseEtu varchar(45)
+);
+insert into etudiant (CINEtu, nomEtu,prenomEtu,dateNaissEtu,niveauEtu,nomVilleEtu,AdresseEtu)
+values('AB234567','Alami','Ahmad','1986-01-01','Rue du port,13','Tanger','bac'),
+('GS5346789','Toumi','Aicha','2000-03-12','N12 immeuble Jaouhara','Casablanca','Master'),
+('C0987265','Souni','Sanaa','1998-04-30','Place du peuple n 2','Tanger','Niveau bac'),
+('D2356903','Idrissi Alami','Mohammed','1996-05-05','Lotisement najah,rue n12 immeuble 3','Rabat','Bac+ 4'),
+('Y1234987','Ouled thami','Ali','1979-12-04','La ville haute,rue chouhada n 6','Tanger','Bachelor'),
+('J3578902','Ben Omar','Abd Allah','1990-06-25','Villa Amina n12 bir rami','Kenitra','Phd'),
+('F9827363','Boudiaf','Fatima Zohra','1997-01-10','Immeuble iftikhar n 13 ettakaddoum','Rabat','Bac+ 2');
+update etudiant
+set nomEtu='BENAAMAR' ,
+prenomEtu='Abdelilah'
+where CINEtu='J3578902';
+update etudiant
+set nomVilleEtu='640'
+where nomVilleEtu='Tanger';
+update etudiant
+set nomVilleEtu='780'
+where nomVilleEtu='Casablanca';
+update etudiant
+set nomVilleEtu='810'
+where nomVilleEtu='Rabat';
+update etudiant
+set nomVilleEtu='222'
+where nomVilleEtu='kenitra';
+select *from etudiant;
+drop table Villes;
+create table Villes(
+code int primary key,
+libelle varchar(30)
+);
+insert into Villes
+values(780,'Casablanca'),
+(810,'Rabat'),
+(640,'Tanger'),
+(222,'kenitra');
+select * from Villes;
+alter table etudiant
+modify nomVilleEtu int;
+alter table etudiant
+add constraint fk_etudiant
+foreign key (nomVilleEtu) references Villes(code);
+
+create table sessionn (
+codeSess int primary key ,
+nomSess varchar(30),
+dateDebut date not null,
+dateFin date not null,
+codeForm int references formation (codeForm)
+);
+insert into sessionn (codeSess,nomSess,dateDebut,dateFin,codeForm)
+values(1101,'Session1101','2022-01-02','2022-01-14',11),
+(1102,'Session1102','2022-02-03','2022-02-15',11),
+(1201,'Session1201','2022-03-04','2022-03-18',12),
+(1202,'Session1202','2022-04-05','2022-04-19',12),
+(1301,'Session1301','2022-01-06','2022-01-21',13),
+(1302,'Session1302','2022-05-07','2022-05-22',13),
+(1303,'Session1303','2022-06-08','2022-06-23',13),
+(1401,'Session1401','2022-09-01','2022-09-11',14),
+(1402,'Session1402','2022-08-08','2022-08-18',14),
+(1501,'Session1501','2022-11-11','2022-12-01',15),
+(1502,'Session1502','2022-09-12','2022-10-02',15),
+(1601,'Session1601','2022-09-13','2022-09-25',16),
+(1602,'Session1602','2022-10-14','2022-10-26',16),
+(1104,'Session1104','2022-10-15','2022-10-27',11),
+(1203,'Session1203','2022-11-16','2022-11-30',12),
+(1204,'Session1204','2022-12-17','2022-12-31',12);
+alter table sessionn
+add constraint
+check ('dateDebut'<'dateFin');
+update sessionn
+set dateFin=date_add(dateFin,interval 1 year),
+dateDebut=date_add(dateDebut,interval 1 year);
+alter table sessionn
+add column active varchar(10);
+update sessionn
+set active="active"
+where dateDebut<'2023-09-30';
+select * from sessionn;
+drop table inscription;
+create table inscription (
+codeSession int references sessionn (codeSess),
+CINEtu varchar(30) references etudiant (CINEtu),
+typeCours varchar(30) not null,
+primary key (CINEtu,codeSession)
+);
+-- alter table inscription
+-- drop column type_de_cours ;
+alter table inscription
+add constraint fk_typecours
+foreign key (typecours) references typecours(code);
+update inscription 
+set typeCours='P'
+where typeCours="Présentiel";
+update inscription 
+set typeCours='D'
+where typeCours="Distanciel";
+alter table inscription
+modify typeCours char(1);
+drop table Typecours;
+create table TypeCours (
+code char(1) primary key,
+libelle varchar(30) 
+);
+select * from TypeCours;
+insert into TypeCours(code)
+values('p'),
+('D');
+update TypeCours
+set libelle="Présentiel" where code='P';
+update TypeCours
+set libelle="Distanciel" where code='D';
+insert into inscription (codeSession,CINEtu,typeCours)
+values(1101,'AB234567','Distanciel'),
+(1101,'GS5346789','Distanciel'),
+(1101,'C0987265','Distanciel'),
+(1101,'D2356903','Distanciel'),
+(1101,'Y1234987','Distanciel'),
+(1101,'J3578902','Distanciel'),
+(1101,'F9827363','Distanciel'),
+(1201,'AB234567','Présentiel'),
+(1201,'GS5346789','Présentiel'),
+(1201,'C0987265','Présentiel'),
+(1201,'D2356903','Présentiel'),
+(1201,'Y1234987','Présentiel'),
+(1201,'J3578902','Présentiel'),
+(1302,'AB234567','Présentiel'),
+(1302,'GS5346789','Distanciel'),
+(1302,'C0987265','Présentiel'),
+(1302,'D2356903','Présentiel'),
+(1302,'Y1234987','Présentiel'),
+(1401,'GS5346789','Distanciel'),
+(1401,'C0987265','Présentiel'),
+(1401,'D2356903','Présentiel'),
+(1401,'Y1234987','Distanciel'),
+(1401,'J3578902','Distanciel'),
+(1401,'F9827363','Distanciel'),
+(1501,'AB234567','Distanciel'),
+(1501,'GS5346789','Présentiel'),
+(1501,'C0987265','Distanciel'),
+(1502,'D2356903','Présentiel'),
+(1502,'Y1234987','Présentiel'),
+(1501,'J3578902','Présentiel'),
+(1501,'F9827363','Présentiel');
+delete from inscription
+where CINEtu like 'y%';
+select * from inscription;
+create table specialite (
+codeSpec int primary key,
+nomSpec varchar(30),
+descSpec varchar(40),
+active  int
+);
+insert into specialite (codeSpec,nomSpec,descSpec,active)
+values(101,'GL','Genie logiciel et developpement',1),
+(102,'Data','Data engineering',1),
+(103,'Langues','Anglais,Français',1),
+(104,'Communication','Communication',1),
+(105,'Securite','Reseaux et securite',0);
+select * from specialite;
+drop table catalogue;
+create table catalogue (
+codeSpec int ,
+codeForm int,
+primary key (codeSpec,codeForm)
+);
+alter table catalogue
+add constraint
+foreign key (codeSpec) references specialite(codeSpec);
+alter table catalogue
+add constraint
+foreign key (codeform) references formation(codeForm);
+insert into catalogue (codeSpec,codeForm)
+values(101,11),
+(101,12),
+(102,15),
+(101,15),
+(103,13),
+(104,13),
+(104,14),
+(104,16);
+select *from catalogue;
